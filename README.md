@@ -35,5 +35,5 @@ ezpub -p "\package-path\dist\*"
 * **If token is not created yet, it will start process "-t" automatically.**
 
 ## Links
-**https://packaging.python.org/tutorials/packaging-projects/**
-**https://twine.readthedocs.io/en/latest/**
+* **https://packaging.python.org/tutorials/packaging-projects/**
+* **https://twine.readthedocs.io/en/latest/**
