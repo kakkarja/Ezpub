@@ -18,7 +18,7 @@ def tokfile(token: str = None):
     if token:
         if token == 'd':
             if '.pypirc' in os.listdir(os.environ['USERPROFILE']):
-                a = AttSet(pth, True)
+                a = AttSet(pth)
                 for i in [a.FILE_ATTRIBUTE_HIDDEN, a.FILE_ATTRIBUTE_SYSTEM]:
                     a.set_file_attrib(i)
                 os.remove(pth)
