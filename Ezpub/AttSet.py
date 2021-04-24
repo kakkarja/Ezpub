@@ -12,6 +12,7 @@ class AttSet:
     """
     FILE_ATTRIBUTE_HIDDEN = stat.FILE_ATTRIBUTE_HIDDEN
     FILE_ATTRIBUTE_SYSTEM = stat.FILE_ATTRIBUTE_SYSTEM
+    FILE_ATTRIBUTE_READONLY = stat.FILE_ATTRIBUTE_READONLY
     
     def __init__(self, filename: str, state: bool = False):
         self.filename = filename
@@ -23,6 +24,7 @@ class AttSet:
         current = os.stat(self.filename).st_file_attributes
         ck = ((stat.FILE_ATTRIBUTE_HIDDEN, 'Hidden'), 
               (stat.FILE_ATTRIBUTE_SYSTEM, 'System'),
+              (stat.FILE_ATTRIBUTE_READONLY, 'Read-Only'),
              )
         ckr = {}
         for i, j in ck:
@@ -35,9 +37,9 @@ class AttSet:
     https://stackoverflow.com/questions/40367961/how-to-read-or-write-the-a-s-h-r-i-file-attributes-on-windows-using-python-and-c 
     """
     def set_file_attrib(self, attr: int):
-        # Set tvg file attributes.
+        # Set file attributes.
         
-        if attr in [AttSet.FILE_ATTRIBUTE_HIDDEN, AttSet.FILE_ATTRIBUTE_SYSTEM]:
+        if attr in [AttSet.FILE_ATTRIBUTE_HIDDEN, AttSet.FILE_ATTRIBUTE_SYSTEM, AttSet.FILE_ATTRIBUTE_READONLY]:
             current = os.stat(self.filename).st_file_attributes
             if self.state:
                 changed = current | attr
@@ -45,4 +47,4 @@ class AttSet:
                 changed = current & ~attr
             if current != changed:
                 if not ctypes.windll.kernel32.SetFileAttributesW(self.filename, changed):
-                    raise ctypes.WinError(ctypes.get_last_error())
+                    raise ctypes.WinError(ctypes.get_last_error())    

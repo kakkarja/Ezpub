@@ -24,7 +24,7 @@ ezpub -t %VARTOKEN%
 ezpub -b "\package-path"
 ```
 **TAKE NOTE:**
-* **Ezpub will try to remove existing [build, dist, and package.egg-info] and create new one.**
+* **Ezpub will try to move existing [build, dist, and package.egg-info] to created archive folder and create new one.**
     * **If Exception occured, user need to remove them manually.**   
 
 **Pubish to PyPI.**

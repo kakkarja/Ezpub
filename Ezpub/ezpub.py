@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-# Copyright © kakkarja (K A K)
+# Copyright © karjakak (K A K)
 
 from .AttSet import AttSet
 import os
 import shutil
 from subprocess import Popen, PIPE
 import argparse
+from datetime import datetime as dt
 
 # Reference:
 #stackoverflow.com/.../constantly-print-subprocess-output-while-process-is-running
@@ -33,10 +34,8 @@ def tokfile(token: str = None):
         root.withdraw()
         root.update()
         gtt = simpledialog.askstring('', 'Token:', parent = root, show = '*')
-        ask = None
         if gtt:
-            if os.getenv('TOKEN_PYPI') == None:
-                ask = messagebox.askyesno('', 'Do you want set token to variable environment?', parent = root)
+            ask = messagebox.askyesno('', 'Do you want set token to variable environment?', parent = root)
             root.destroy()            
             if ask:
                 pnam = f'setx TOKEN_PYPI {gtt}'
@@ -45,7 +44,7 @@ def tokfile(token: str = None):
                         print(line, end='')
                 print('var: TOKEN_PYPI')
             else:
-                print('Var is exist, please delete manually in order to create again!')
+                print('Token not set to variable environment!')
             ky = gtt
         else:
             print('No token, aborted!')
@@ -68,11 +67,16 @@ def build(path: str):
     
     if os.path.isdir(path):
         os.chdir(path)
-        folds = [f for i in ['dist', 'build','.egg-info'] for f in os.listdir(path) if i in f]
+        fda = 'Archive_' + path.rpartition("\\")[2] 
+        if fda not in os.listdir():
+            os.mkdir(fda)
+        folds = [f for i in ['build', 'dist', '.egg-info'] for f in os.listdir() if i in f]
         if folds:
+            fda = os.path.join(fda, f'{str(dt.timestamp(dt.now())).replace(".", "_")}')
+            os.mkdir(fda)
             try:
                 for i in folds:
-                    shutil.rmtree(i)
+                    shutil.move(i, fda)
                 pnam = f'py -m build'
                 with Popen(pnam, stdout = PIPE, bufsize = 1, universal_newlines = True, text = True) as p:
                     for line in p.stdout:
