@@ -8,7 +8,7 @@ import os
 
 class AttSet:
     """
-    Class attribute only hidden and system.
+    Class file attribute for hidden, system, and read-only.
     """
     FILE_ATTRIBUTE_HIDDEN = stat.FILE_ATTRIBUTE_HIDDEN
     FILE_ATTRIBUTE_SYSTEM = stat.FILE_ATTRIBUTE_SYSTEM

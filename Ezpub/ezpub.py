@@ -7,6 +7,8 @@ import shutil
 from subprocess import Popen, PIPE
 import argparse
 from datetime import datetime as dt
+from Clien import clien
+import sys
 
 # Reference:
 #stackoverflow.com/.../constantly-print-subprocess-output-while-process-is-running
@@ -16,11 +18,15 @@ def tokfile(token: str = None):
     
     pth = os.path.join(os.environ['USERPROFILE'], '.pypirc')
     ky = None
+    vr = "TOKEN_PYPI"
     if token:
         if token == 'd':
             if '.pypirc' in os.listdir(os.environ['USERPROFILE']):
                 a = AttSet(pth)
-                for i in [a.FILE_ATTRIBUTE_HIDDEN, a.FILE_ATTRIBUTE_SYSTEM]:
+                for i in [a.FILE_ATTRIBUTE_HIDDEN, 
+                          a.FILE_ATTRIBUTE_SYSTEM,
+                          a.FILE_ATTRIBUTE_READONLY,
+                         ]:
                     a.set_file_attrib(i)
                 os.remove(pth)
                 print('Token Removed') 
@@ -35,31 +41,28 @@ def tokfile(token: str = None):
         root.update()
         gtt = simpledialog.askstring('', 'Token:', parent = root, show = '*')
         if gtt:
-            ask = messagebox.askyesno('', 'Do you want set token to variable environment?', parent = root)
-            root.destroy()            
-            if ask:
-                pnam = f'setx TOKEN_PYPI {gtt}'
-                with Popen(pnam, stdout = PIPE, bufsize = 1, universal_newlines = True, text = True) as p:
-                    for line in p.stdout:
-                        print(line, end='')
-                print('var: TOKEN_PYPI')
-            else:
-                print('Token not set to variable environment!')
-            ky = gtt
+            clien.cmsk(gtt, vr, vr.lower().replace('_',''))
         else:
             print('No token, aborted!')
             
     if ky:
-        f = f'[pypi]\nusername = __token__\npassword = {ky}'
-        if not '.pypirc' in os.listdir(os.environ['USERPROFILE']):
-            with open(pth, 'w') as tkn:
-                tkn.write(f)
-            a = AttSet(pth, True)
-            for i in [a.FILE_ATTRIBUTE_HIDDEN, a.FILE_ATTRIBUTE_SYSTEM]:
-                a.set_file_attrib(i)
-            print('Token created')
+        if os.getenv(vr) != None and os.environ[vr] == ky:
+            ky = clien.reading(ky, vr.lower().replace('_', ''))
+            f = f'[pypi]\nusername = __token__\npassword = {ky}'
+            if not '.pypirc' in os.listdir(os.environ['USERPROFILE']):
+                with open(pth, 'w') as tkn:
+                    tkn.write(f)
+                a = AttSet(pth, True)
+                for i in [a.FILE_ATTRIBUTE_HIDDEN, 
+                          a.FILE_ATTRIBUTE_SYSTEM,
+                          a.FILE_ATTRIBUTE_READONLY,
+                         ]:
+                    a.set_file_attrib(i)
+                print('Token created')
+            else:
+                print('Nothing to create, token already created!')
         else:
-            print('Nothing to create, token already created!')
+            print('Please set environment variable first!')
 
 def build(path: str):
     # Build egg info, build, dist for upload to PyPI.
@@ -77,35 +80,30 @@ def build(path: str):
             try:
                 for i in folds:
                     shutil.move(i, fda)
-                pnam = f'py -m build'
-                with Popen(pnam, stdout = PIPE, bufsize = 1, universal_newlines = True, text = True) as p:
-                    for line in p.stdout:
-                        print(line, end='')
             except Exception as e:
                 print(e)
                 print(f'Please remove {folds} manually!')
                 os.startfile(path)
-        else:
-            pnam = f'py -m build'
-            with Popen(pnam, stdout = PIPE, bufsize = 1, universal_newlines = True, text = True) as p:
-                for line in p.stdout:
-                    print(line, end='')            
+                sys.exit()
+        pnam = f'py -m build'
+        with Popen(pnam, stdout = PIPE, bufsize = 1, universal_newlines = True, text = True) as p:
+            for line in p.stdout:
+                print(line, end='')            
                 
 def publish(path: str):
     # Upload to PyPI.
     
     os.chdir(os.environ['USERPROFILE'])
+    pnam = None
     if '.pypirc' in os.listdir():
         pnam = f'py -m twine upload "{path}"'
-        with Popen(pnam, stdout = PIPE, bufsize = 1, universal_newlines = True, text = True) as p:
-            for line in p.stdout:
-                print(line, end='')
     else:
         if os.getenv('TOKEN_PYPI') == None:
-            tokfile()
+            print('Please create environment variable first for token!')
         else:
             tokfile(os.environ['TOKEN_PYPI'])
-        pnam = f'py -m twine upload "{path}"'
+            pnam = f'py -m twine upload "{path}"'
+    if pnam:
         with Popen(pnam, stdout = PIPE, bufsize = 1, universal_newlines = True, text = True) as p:
             for line in p.stdout:
                 print(line, end='')
