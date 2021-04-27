@@ -35,21 +35,22 @@ def tokfile(token: str = None):
         else:
             ky = token
     else:
-        from tkinter import Tk, simpledialog, messagebox
-        root = Tk()
-        root.withdraw()
-        root.update()
-        gtt = simpledialog.askstring('', 'Token:', parent = root, show = '*')
-        if gtt:
-            clien.cmsk(gtt, vr, vr.lower().replace('_',''))
+        print(f'IMPORTANT!')
+        print(f'Please fill var: {vr}')
+        gtt = clien.insdat()
+        if gtt and gtt[1] == vr:
+            clien.cmsk(gtt[0], gtt[1], gtt[2])
         else:
-            print('No token, aborted!')
-            
+            if gtt is None:
+                print('All fields need to be filled!')
+            else:
+                print(f'Field "var:" must be "{vr}"!')            
     if ky:
-        if os.getenv(vr) != None and os.environ[vr] == ky:
-            ky = clien.reading(ky, vr.lower().replace('_', ''))
+        pss = clien.pssd()
+        if os.getenv(vr) and pss:
+            ky = clien.reading(ky, pss)
             f = f'[pypi]\nusername = __token__\npassword = {ky}'
-            if not '.pypirc' in os.listdir(os.environ['USERPROFILE']):
+            if not os.path.isfile(pth):
                 with open(pth, 'w') as tkn:
                     tkn.write(f)
                 a = AttSet(pth, True)
@@ -62,7 +63,7 @@ def tokfile(token: str = None):
             else:
                 print('Nothing to create, token already created!')
         else:
-            print('Please set environment variable first!')
+            print('Token not created yet!')
 
 def build(path: str):
     # Build egg info, build, dist for upload to PyPI.
@@ -70,43 +71,37 @@ def build(path: str):
     
     if os.path.isdir(path):
         os.chdir(path)
-        fda = 'Archive_' + path.rpartition("\\")[2] 
-        if fda not in os.listdir():
-            os.mkdir(fda)
         folds = [f for i in ['build', 'dist', '.egg-info'] for f in os.listdir() if i in f]
         if folds:
-            fda = os.path.join(fda, f'{str(dt.timestamp(dt.now())).replace(".", "_")}')
+            fda = os.path.join('Archive_' + path.rpartition("\\")[2], 
+                               f'{str(dt.timestamp(dt.now())).replace(".", "_")}')
+            if not os.path.isdir(fda.rpartition('\\')[0]):
+                os.mkdir(fda.rpartition('\\')[0])
             os.mkdir(fda)
-            try:
-                for i in folds:
+            for i in folds:
+                try:
                     shutil.move(i, fda)
-            except Exception as e:
-                print(e)
-                print(f'Please remove {folds} manually!')
-                os.startfile(path)
-                sys.exit()
+                except Exception as e:
+                    print(e)
+                    print(f'Please remove {folds} manually!')
+                    os.startfile(path)
+                    sys.exit()
         pnam = f'py -m build'
         with Popen(pnam, stdout = PIPE, bufsize = 1, universal_newlines = True, text = True) as p:
             for line in p.stdout:
-                print(line, end='')            
+                print(line, end='')
                 
 def publish(path: str):
     # Upload to PyPI.
     
     os.chdir(os.environ['USERPROFILE'])
-    pnam = None
     if '.pypirc' in os.listdir():
         pnam = f'py -m twine upload "{path}"'
-    else:
-        if os.getenv('TOKEN_PYPI') == None:
-            print('Please create environment variable first for token!')
-        else:
-            tokfile(os.environ['TOKEN_PYPI'])
-            pnam = f'py -m twine upload "{path}"'
-    if pnam:
         with Popen(pnam, stdout = PIPE, bufsize = 1, universal_newlines = True, text = True) as p:
             for line in p.stdout:
                 print(line, end='')
+    else:
+        print('Please create token first!')
         
 def main():
     # This will only work in cli.

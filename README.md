@@ -1,6 +1,6 @@
 # Ezpub [cli-environment]
 ## Tool to help developer to publish package to PyPI
-### [Alpha-development]
+### [Beta-development]
 
 ## Installation
 ```
