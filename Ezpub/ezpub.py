@@ -49,19 +49,22 @@ def tokfile(token: str = None):
         pss = clien.pssd()
         if os.getenv(vr) and pss:
             ky = clien.reading(ky, pss)
-            f = f'[pypi]\nusername = __token__\npassword = {ky}'
-            if not os.path.isfile(pth):
-                with open(pth, 'w') as tkn:
-                    tkn.write(f)
-                a = AttSet(pth, True)
-                for i in [a.FILE_ATTRIBUTE_HIDDEN, 
-                          a.FILE_ATTRIBUTE_SYSTEM,
-                          a.FILE_ATTRIBUTE_READONLY,
-                         ]:
-                    a.set_file_attrib(i)
-                print('Token created')
+            if ky:
+                f = f'[pypi]\nusername = __token__\npassword = {ky}'
+                if not os.path.isfile(pth):
+                    with open(pth, 'w') as tkn:
+                        tkn.write(f)
+                    a = AttSet(pth, True)
+                    for i in [a.FILE_ATTRIBUTE_HIDDEN, 
+                              a.FILE_ATTRIBUTE_SYSTEM,
+                              a.FILE_ATTRIBUTE_READONLY,
+                             ]:
+                        a.set_file_attrib(i)
+                    print('Token created')
+                else:
+                    print('Nothing to create, token already created!')                    
             else:
-                print('Nothing to create, token already created!')
+                print('Unable to create token!')
         else:
             print('Token not created yet!')
 
