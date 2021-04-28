@@ -32,7 +32,7 @@ ezpub -b "\package-path"
 ezpub -p "\package-path\dist\*"
 ```
 **TAKE NOTE:**
-* **If token is not created yet, it will start process "-t" automatically.**
+* **If token is not created yet, ~~it will start process "-t" automatically~~ you will be prompt to create first.**
 
 ## Links
 * **https://packaging.python.org/tutorials/packaging-projects/**
