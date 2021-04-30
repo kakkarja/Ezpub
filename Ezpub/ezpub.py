@@ -21,7 +21,7 @@ def tokfile(token: str = None):
     vr = "TOKEN_PYPI"
     if token:
         if token == 'd':
-            if '.pypirc' in os.listdir(os.environ['USERPROFILE']):
+            if os.path.isfile(pth):
                 a = AttSet(pth)
                 for i in [a.FILE_ATTRIBUTE_HIDDEN, 
                           a.FILE_ATTRIBUTE_SYSTEM,
@@ -46,14 +46,12 @@ def tokfile(token: str = None):
             else:
                 print(f'Field "var:" must be "{vr}"!')            
     if ky:
-        pss = clien.pssd()
-        if os.getenv(vr) and pss:
-            ky = clien.reading(ky, pss)
-            if ky:
-                f = f'[pypi]\nusername = __token__\npassword = {ky}'
+        if all([os.getenv(vr, False) == ky, pss := clien.pssd()]):
+            if ky := clien.reading(ky, pss):
                 if not os.path.isfile(pth):
                     with open(pth, 'w') as tkn:
-                        tkn.write(f)
+                        tkn.write(f'[pypi]\nusername = __token__\npassword = {ky}')
+                    del ky
                     a = AttSet(pth, True)
                     for i in [a.FILE_ATTRIBUTE_HIDDEN, 
                               a.FILE_ATTRIBUTE_SYSTEM,
@@ -66,7 +64,10 @@ def tokfile(token: str = None):
             else:
                 print('Unable to create token!')
         else:
-            print('Token not created yet!')
+            if os.getenv(vr, False):
+                print('Missing passcode!!!')
+            else:
+                print('Variable for token is not exist!!!\nPlease type: "ezpub -t None"')
 
 def build(path: str):
     # Build egg info, build, dist for upload to PyPI.

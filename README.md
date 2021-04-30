@@ -1,6 +1,5 @@
 # Ezpub [cli-environment]
 ## Tool to help developer to publish package to PyPI
-### [Beta-development]
 
 ## Installation
 ```
@@ -25,7 +24,7 @@ ezpub -b "\package-path"
 ```
 **TAKE NOTE:**
 * **Ezpub will try to move existing [build, dist, and package.egg-info] to created archive folder and create new one.**
-    * **If Exception occured, user need to remove them manually.**   
+    * **If Exception occured, user need to remove them manually.**
 
 **Pubish to PyPI.**
 ```
