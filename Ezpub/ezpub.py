@@ -9,6 +9,8 @@ import argparse
 from datetime import datetime as dt
 from Clien import clien
 import sys
+from sys import platform
+from pathlib import Path
 
 # Reference:
 #stackoverflow.com/.../constantly-print-subprocess-output-while-process-is-running
@@ -16,18 +18,20 @@ import sys
 def tokfile(token: str = None):
     # Create token to .pyirc for publish to PyPI.
     
-    pth = os.path.join(os.environ['USERPROFILE'], '.pypirc')
+    pth = 'USERPROFILE' if platform.startswith('win') else 'HOME'
+    pth = os.path.join(os.environ[pth], '.pypirc')
     ky = None
     vr = "TOKEN_PYPI"
     if token:
         if token == 'd':
             if os.path.isfile(pth):
-                a = AttSet(pth)
-                for i in [a.FILE_ATTRIBUTE_HIDDEN, 
-                          a.FILE_ATTRIBUTE_SYSTEM,
-                          a.FILE_ATTRIBUTE_READONLY,
-                         ]:
-                    a.set_file_attrib(i)
+                if platform.startswith('win'):
+                    a = AttSet(pth)
+                    for i in [a.FILE_ATTRIBUTE_HIDDEN, 
+                            a.FILE_ATTRIBUTE_SYSTEM,
+                            a.FILE_ATTRIBUTE_READONLY,
+                            ]:
+                        a.set_file_attrib(i)
                 os.remove(pth)
                 print('Token Removed') 
             else:
@@ -39,7 +43,7 @@ def tokfile(token: str = None):
         print(f'Please fill var: {vr}')
         gtt = clien.insdat()
         if gtt and gtt[1] == vr:
-            clien.cmsk(gtt[0], gtt[1], gtt[2])
+            clien.cmsk(gtt[0], gtt[2], gtt[1])
         else:
             if gtt is None:
                 print('All fields need to be filled!')
@@ -52,12 +56,13 @@ def tokfile(token: str = None):
                     with open(pth, 'w') as tkn:
                         tkn.write(f'[pypi]\nusername = __token__\npassword = {ky}')
                     del ky
-                    a = AttSet(pth, True)
-                    for i in [a.FILE_ATTRIBUTE_HIDDEN, 
-                              a.FILE_ATTRIBUTE_SYSTEM,
-                              a.FILE_ATTRIBUTE_READONLY,
-                             ]:
-                        a.set_file_attrib(i)
+                    if platform.startswith('win'):
+                        a = AttSet(pth, True)
+                        for i in [a.FILE_ATTRIBUTE_HIDDEN, 
+                                a.FILE_ATTRIBUTE_SYSTEM,
+                                a.FILE_ATTRIBUTE_READONLY,
+                                ]:
+                            a.set_file_attrib(i)
                     print('Token created')
                 else:
                     print('Nothing to create, token already created!')                    
@@ -73,14 +78,19 @@ def build(path: str):
     # Build egg info, build, dist for upload to PyPI.
     # When rebuild, existing ones will be removed auto or manually by user.
     
-    if os.path.isdir(path):
-        os.chdir(path)
+    pth = Path(path)
+    if os.path.isdir(pth):
+        os.chdir(pth)
         folds = [f for i in ['build', 'dist', '.egg-info'] for f in os.listdir() if i in f]
         if folds:
-            fda = os.path.join('Archive_' + path.rpartition("\\")[2], 
-                               f'{str(dt.timestamp(dt.now())).replace(".", "_")}')
-            if not os.path.isdir(fda.rpartition('\\')[0]):
-                os.mkdir(fda.rpartition('\\')[0])
+            fda = Path(
+                os.path.join(
+                    ('Archive_' + pth.name), 
+                    f'{str(dt.timestamp(dt.now())).replace(".", "_")}'
+                )
+            )
+            if not os.path.isdir(fda.parent):
+                os.mkdir(fda.parent)
             os.mkdir(fda)
             for i in folds:
                 try:
@@ -88,24 +98,37 @@ def build(path: str):
                 except Exception as e:
                     print(e)
                     print(f'Please remove {folds} manually!')
-                    os.startfile(path)
+                    if platform.startswith('win'):
+                        os.startfile(path)
+                    else:
+                        os.system(f'open {path}')
                     sys.exit()
-        pnam = f'py -m build'
+        pnam = f'py -m build' if platform.startswith('win') else 'python3 -m build'.split()
         with Popen(pnam, stdout = PIPE, bufsize = 1, universal_newlines = True, text = True) as p:
             for line in p.stdout:
                 print(line, end='')
                 
 def publish(path: str):
     # Upload to PyPI.
-    
-    os.chdir(os.environ['USERPROFILE'])
-    if '.pypirc' in os.listdir():
-        pnam = f'py -m twine upload "{path}"'
-        with Popen(pnam, stdout = PIPE, bufsize = 1, universal_newlines = True, text = True) as p:
-            for line in p.stdout:
-                print(line, end='')
+    if os.path.exists('.pypirc'):
+        if platform.startswith('win'):
+            os.chdir(os.environ['USERPROFILE'])
+            pnam = f'py -m twine upload "{path}"'
+            with Popen(
+                pnam, stdout = PIPE, bufsize = 1, 
+                universal_newlines = True, text = True
+            ) as p:
+                for line in p.stdout:
+                    print(line, end='')
+        else:
+            #os.chdir(os.environ['HOME'])
+            print(
+                f'\n{61*"-"}\nWrite "python3 -m twine upload dist/*" '
+                f'for uploading to PyPI!\n{61*"-"}\n'
+            )
     else:
         print('Please create token first!')
+   
         
 def main():
     # This will only work in cli.

@@ -16,11 +16,19 @@ ezpub -t d
 ```
 **Create save token.**
 ```
+# Windows
 ezpub -t %VARTOKEN%
+
+# MacOS X
+ezpub -t $VARTOKEN
 ```
 **Building the package and create [build, dist, and package.egg-info] for uploading to PyPI.**  
 ```
+# Window
 ezpub -b "\package-path"
+
+# MacOS X
+ezpub -b /package_path
 ```
 **TAKE NOTE:**
 * **Ezpub will try to move existing [build, dist, and package.egg-info] to created archive folder and create new one.**
@@ -28,7 +36,11 @@ ezpub -b "\package-path"
 
 **Pubish to PyPI.**
 ```
+# For Windows only
 ezpub -p "\package-path\dist\*"
+
+# For MacOS X
+python3 -m twine upload package_path/dist/*
 ```
 **TAKE NOTE:**
 * **If token is not created yet, ~~it will start process "-t" automatically~~ user will be prompt to create first.**
