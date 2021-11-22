@@ -110,24 +110,31 @@ def build(path: str):
                 
 def publish(path: str):
     # Upload to PyPI.
-    if os.path.exists('.pypirc'):
+    
+    ckpth = os.path.join(
+        os.environ['USERPROFILE'],
+        '.pypirc'
+    ) if platform.startswith('win') else os.path.join(
+        os.environ['HOME'],
+        '.pypirc'
+    )
+    if os.path.exists(ckpth):
+        pth = os.path.abspath(path)
         if platform.startswith('win'):
             os.chdir(os.environ['USERPROFILE'])
-            pnam = f'py -m twine upload "{path}"'
-            with Popen(
-                pnam, stdout = PIPE, bufsize = 1, 
-                universal_newlines = True, text = True
-            ) as p:
-                for line in p.stdout:
-                    print(line, end='')
         else:
-            #os.chdir(os.environ['HOME'])
-            print(
-                f'\n{61*"-"}\nWrite "python3 -m twine upload dist/*" '
-                f'for uploading to PyPI!\n{61*"-"}\n'
-            )
+            os.chdir(os.environ['HOME'])
+        pnam = f'py -m twine upload "{pth}"'
+        with Popen(
+            pnam, stdout = PIPE, bufsize = 1, 
+            universal_newlines = True, text = True
+        ) as p:
+            for line in p.stdout:
+                print(line, end='')
+        del pth
     else:
         print('Please create token first!')
+    del ckpth
    
         
 def main():
