@@ -78,7 +78,7 @@ def build(path: str):
     # Build egg info, build, dist for upload to PyPI.
     # When rebuild, existing ones will be removed auto or manually by user.
     
-    pth = Path(path)
+    pth = Path(os.path.abspath(path))
     if os.path.isdir(pth):
         os.chdir(pth)
         folds = [f for i in ['build', 'dist', '.egg-info'] for f in os.listdir() if i in f]
