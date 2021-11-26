@@ -124,18 +124,19 @@ def build(path: str):
 def publish(path: str):
     # Upload to PyPI.
 
+    ckplt = True if platform.startswith("win") else False
     ckpth = (
         os.path.join(os.environ["USERPROFILE"], ".pypirc")
-        if platform.startswith("win")
+        if ckplt
         else os.path.join(os.environ["HOME"], ".pypirc")
     )
     if os.path.exists(ckpth):
         pth = os.path.abspath(path)
-        if platform.startswith("win"):
+        if ckplt:
             os.chdir(os.environ["USERPROFILE"])
         else:
             os.chdir(os.environ["HOME"])
-        pnam = f'py -m twine upload "{pth}"'
+        pnam = f'py -m twine upload "{pth}"' if ckplt else ['python3', '-m', 'twine', 'upload', f"{pth}"]
         with Popen(
             pnam, stdout=PIPE, bufsize=1, universal_newlines=True, text=True
         ) as p:
@@ -144,7 +145,7 @@ def publish(path: str):
         del pth
     else:
         print("Please create token first!")
-    del ckpth
+    del ckpth, ckplt
 
 
 def main():
