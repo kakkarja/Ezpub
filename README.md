@@ -37,10 +37,10 @@ ezpub -b /package_path
 **Pubish to PyPI.**
 ```
 # For Windows only
-ezpub -p "\package-path\dist\*"
+ezpub -p \package-path\dist\*
 
 # For MacOS X
-python3 -m twine upload package_path/dist/*
+python3 -m twine upload "package_path/dist/*"
 ```
 **TAKE NOTE:**
 * **If token is not created yet, ~~it will start process "-t" automatically~~ user will be prompt to create first.**
