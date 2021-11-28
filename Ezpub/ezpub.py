@@ -121,31 +121,36 @@ def build(path: str):
                 print(line, end="")
 
 
+def popenp(pnam: str | list):
+    with Popen(
+        pnam, stdout=PIPE, bufsize=1, universal_newlines=True, text=True
+    ) as p:
+        for line in p.stdout:
+            print(line, end="")
+
+
 def publish(path: str):
     # Upload to PyPI.
 
-    ckplt = True if platform.startswith("win") else False
-    ckpth = (
-        os.path.join(os.environ["USERPROFILE"], ".pypirc")
-        if ckplt
-        else os.path.join(os.environ["HOME"], ".pypirc")
+    pth = os.path.abspath(path)
+    ckplt = (
+        Path(os.path.join(os.environ["USERPROFILE"], ".pypirc")), True
+    ) if platform.startswith("win") else (
+        Path(os.path.join(os.environ["HOME"], ".pypirc")), False
     )
-    if os.path.exists(ckpth):
-        pth = os.path.abspath(path)
-        if ckplt:
-            os.chdir(os.environ["USERPROFILE"])
-        else:
-            os.chdir(os.environ["HOME"])
-        pnam = f'py -m twine upload "{pth}"' if ckplt else ['python3', '-m', 'twine', 'upload', f"{pth}"]
-        with Popen(
-            pnam, stdout=PIPE, bufsize=1, universal_newlines=True, text=True
-        ) as p:
-            for line in p.stdout:
-                print(line, end="")
-        del pth
-    else:
-        print("Please create token first!")
-    del ckpth, ckplt
+    altr = os.path.exists(ckplt[0]), ckplt[1]
+    match altr:
+        case (True, True):
+            os.chdir(ckplt[0].parent)
+            pnam = f'py -m twine upload "{pth}"'
+            popenp(pnam)
+        case (True, False):
+            os.chdir(ckplt[0].parent)
+            pnam = ['python3', '-m', 'twine', 'upload', f"{pth}"]
+            popenp(pnam)
+        case (False, _):
+            print("Please create token first!")
+    del pth, ckplt, altr
 
 
 def main():
