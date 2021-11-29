@@ -23,61 +23,61 @@ def tokfile(token: str = None):
     pth = os.path.join(os.environ[pth], ".pypirc")
     ky = None
     vr = "TOKEN_PYPI"
-    if token:
-        if token == "d":
-            if os.path.isfile(pth):
-                if platform.startswith("win"):
-                    a = AttSet(pth)
-                    for i in [
-                        a.FILE_ATTRIBUTE_HIDDEN,
-                        a.FILE_ATTRIBUTE_SYSTEM,
-                        a.FILE_ATTRIBUTE_READONLY,
-                    ]:
-                        a.set_file_attrib(i)
-                os.remove(pth)
-                print("Token Removed")
-            else:
-                print("Nothing to remove, token not created yet!")
-        else:
-            ky = token
-    else:
-        print(f"IMPORTANT!")
-        print(f"Please fill var: {vr}")
-        gtt = clien.insdat()
-        if gtt and gtt[1] == vr:
-            clien.cmsk(gtt[0], gtt[2], gtt[1])
-        else:
-            if gtt is None:
-                print("All fields need to be filled!")
-            else:
-                print(f'Field "var:" must be "{vr}"!')
-    if ky:
-        if all([os.getenv(vr, False) == ky, pss := clien.pssd()]):
-            if ky := clien.reading(ky, pss):
-                if not os.path.isfile(pth):
-                    with open(pth, "w") as tkn:
-                        tkn.write(f"[pypi]\nusername = __token__\npassword = {ky}")
-                    del ky
+
+    match token:
+        case "d":
+            match os.path.isfile(pth):
+                case True:
                     if platform.startswith("win"):
-                        a = AttSet(pth, True)
+                        a = AttSet(pth)
                         for i in [
                             a.FILE_ATTRIBUTE_HIDDEN,
                             a.FILE_ATTRIBUTE_SYSTEM,
                             a.FILE_ATTRIBUTE_READONLY,
                         ]:
                             a.set_file_attrib(i)
-                    print("Token created")
+                    os.remove(pth)
+                    print("Token Removed")
+                case _:
+                    print("Nothing to remove, token not created yet!")
+        case None:
+            print(f"IMPORTANT!")
+            print(f"Please fill var: {vr}")
+            gtt = clien.insdat()
+            if gtt and gtt[1] == vr:
+                clien.cmsk(gtt[0], gtt[2], gtt[1])
+            else:
+                if gtt is None:
+                    print("All fields need to be filled!")
                 else:
-                    print("Nothing to create, token already created!")
+                    print(f'Field "var:" must be "{vr}"!')
+        case _ as ky:
+            if all([os.getenv(vr, False) == ky, pss := clien.pssd()]):
+                if ky := clien.reading(ky, pss):
+                    if not os.path.isfile(pth):
+                        with open(pth, "w") as tkn:
+                            tkn.write(f"[pypi]\nusername = __token__\npassword = {ky}")
+                        del ky
+                        if platform.startswith("win"):
+                            a = AttSet(pth, True)
+                            for i in [
+                                a.FILE_ATTRIBUTE_HIDDEN,
+                                a.FILE_ATTRIBUTE_SYSTEM,
+                                a.FILE_ATTRIBUTE_READONLY,
+                            ]:
+                                a.set_file_attrib(i)
+                        print("Token created")
+                    else:
+                        print("Nothing to create, token already created!")
+                else:
+                    print("Unable to create token!")
             else:
-                print("Unable to create token!")
-        else:
-            if os.getenv(vr, False):
-                print("Missing passcode!!!")
-            else:
-                print(
-                    'Variable for token is not exist!!!\nPlease type: "ezpub -t None"'
-                )
+                if os.getenv(vr, False):
+                    print("Missing passcode!!!")
+                else:
+                    print(
+                        'Variable for token is not exist!!!\nPlease type: "ezpub -t None"'
+                    )
 
 
 def build(path: str):
@@ -100,25 +100,30 @@ def build(path: str):
             if not os.path.isdir(fda.parent):
                 os.mkdir(fda.parent)
             os.mkdir(fda)
-            for i in folds:
-                try:
+            try:
+                for i in folds:
                     shutil.move(i, fda)
-                except Exception as e:
-                    print(e)
-                    print(f"Please remove {folds} manually!")
-                    if platform.startswith("win"):
-                        os.startfile(path)
-                    else:
-                        os.system(f"open {path}")
-                    sys.exit()
-        pnam = (
-            f"py -m build" if platform.startswith("win") else "python3 -m build".split()
-        )
-        with Popen(
-            pnam, stdout=PIPE, bufsize=1, universal_newlines=True, text=True
-        ) as p:
-            for line in p.stdout:
-                print(line, end="")
+            except Exception as e:
+                print(e)
+                print(f"Please remove {folds} manually!")
+                if platform.startswith("win"):
+                    os.startfile(path)
+                else:
+                    os.system(f"open {path}")
+                sys.exit(1)
+        match all(
+            os.path.exists(pth.joinpath(i)) 
+            for i in ["setup.cfg", "pyproject.toml"]
+            ):
+            case True:
+                pnam = (
+                    f"py -m build" if platform.startswith("win") else "python3 -m build".split()
+                )
+                popenp(pnam)
+            case _:
+                print(
+                    "This package need 'setup.cfg' and 'pyproject.toml'"
+                )
 
 
 def popenp(pnam: str | list):
