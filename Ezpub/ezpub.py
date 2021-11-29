@@ -21,7 +21,6 @@ def tokfile(token: str = None):
 
     pth = "USERPROFILE" if platform.startswith("win") else "HOME"
     pth = os.path.join(os.environ[pth], ".pypirc")
-    ky = None
     vr = "TOKEN_PYPI"
 
     match token:
