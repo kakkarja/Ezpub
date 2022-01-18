@@ -40,14 +40,19 @@ ezpub -b /package_path
 ezpub -p \package-path\dist\*
 
 # For MacOS X
-python3 -m twine upload "package_path/dist/*"
+ezpub -p "package_path/dist/*"
 ```
 **TAKE NOTE:**
 * **If token is not created yet, ~~it will start process "-t" automatically~~ user will be prompt to create first.**
 * **Some firewall not allowed moving files to archive, you may exclude Ezpub from it.**
 * **You can move the files manually and using `py -m build`  instead. [Please see the source code for assurance]**
-* **Ezpub using Clien-karjakak https://pypi.org/project/Clien-karjakak as its required dependency, for encrypting the token.**
-
+* **MacOS X:**
+    * **Extra secure with locking.**
+* **Dependency:**
+    * **twine**
+    * **Clien**
+    * **filepmon**
+    * **filfla**
 ## Links
 * **https://packaging.python.org/tutorials/packaging-projects/**
 * **https://twine.readthedocs.io/en/latest/**

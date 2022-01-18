@@ -11,9 +11,36 @@ from Clien import clien
 import sys
 from sys import platform
 from pathlib import Path
+from filepmon.pgf import FilePermission as fpm
+from filfla.ffl import FilFla as ff
+from io import StringIO
+from contextlib import redirect_stdout
 
 # Reference:
 # stackoverflow.com/.../constantly-print-subprocess-output-while-process-is-running
+
+def prre(lock: bool = True):
+    pth = os.path.join(os.environ["HOME"], '.pypirc')
+    v = None
+    pr = None
+    fl = None
+    if lock:
+        v = StringIO()
+        with redirect_stdout(v):
+            fl =ff(pth)
+            fl.flagger('IMMUTABLE')
+            pr = fpm(pth)
+            pr.changeperm(644)
+            v.flush()
+    else:
+        pr = fpm(pth)
+        pr.changeperm(000)
+        v = StringIO()
+        with redirect_stdout(v):
+            fl =ff(pth)
+            fl.flagger('IMMUTABLE')
+            v.flush()
+    del pth, v, pr, fl
 
 
 def tokfile(token: str = None):
@@ -35,6 +62,9 @@ def tokfile(token: str = None):
                             a.FILE_ATTRIBUTE_READONLY,
                         ]:
                             a.set_file_attrib(i)
+                        del a
+                    else:
+                        prre()
                     os.remove(pth)
                     print("Token Removed")
                 case _:
@@ -65,6 +95,9 @@ def tokfile(token: str = None):
                                 a.FILE_ATTRIBUTE_READONLY,
                             ]:
                                 a.set_file_attrib(i)
+                            del a
+                        else:
+                            prre(False)
                         print("Token created")
                     else:
                         print("Nothing to create, token already created!")
@@ -150,8 +183,10 @@ def publish(path: str):
             popenp(pnam)
         case (True, False):
             os.chdir(ckplt[0].parent)
+            prre()
             pnam = ['python3', '-m', 'twine', 'upload', f"{pth}"]
             popenp(pnam)
+            prre(False)
         case (False, _):
             print("Please create token first!")
     del pth, ckplt, altr
