@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 # Copyright © karjakak (K A K)
 
-from typing import Any
-from .AttSet import AttSet
 import os
 import shutil
 import sys
 import argparse
 import traceback
+from typing import Any
 from subprocess import Popen, PIPE
 from datetime import datetime as dt
 from Clien import clien
@@ -18,6 +17,7 @@ from filfla.ffl import FilFla as ff
 from io import StringIO
 from contextlib import redirect_stdout
 from functools import wraps
+from filatt.filatt import WinAtt, AttSet
 
 # Reference:
 # stackoverflow.com/.../constantly-print-subprocess-output-while-process-is-running
@@ -103,17 +103,17 @@ class Ezpub:
         if lock:
             a = AttSet(pth)
             for i in [
-                a.FILE_ATTRIBUTE_HIDDEN,
-                a.FILE_ATTRIBUTE_SYSTEM,
-                a.FILE_ATTRIBUTE_READONLY,
+                WinAtt.HIDDEN.att,
+                WinAtt.SYSTEM.att,
+                WinAtt.READONLY.att
             ]:
                 a.set_file_attrib(i)
         else:
             a = AttSet(pth, True)
             for i in [
-                a.FILE_ATTRIBUTE_HIDDEN,
-                a.FILE_ATTRIBUTE_SYSTEM,
-                a.FILE_ATTRIBUTE_READONLY,
+                WinAtt.HIDDEN.att,
+                WinAtt.SYSTEM.att,
+                WinAtt.READONLY.att
             ]:
                 a.set_file_attrib(i)
         del a
@@ -280,8 +280,6 @@ def main() -> None:
         ez.build(args.build)
     elif args.publish:
         ez.publish(args.publish)
-    elif args.version:
-        print("Ezpub version: 1.3".upper())
     del ez, args, group, parser
 
 
