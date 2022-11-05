@@ -5,8 +5,6 @@ import os
 import shutil
 import sys
 import argparse
-import traceback
-from typing import Any
 from subprocess import Popen, PIPE
 from datetime import datetime as dt
 from Clien import clien
@@ -16,46 +14,22 @@ from filepmon.pgf import FilePermission as fpm
 from filfla.ffl import FilFla as ff
 from io import StringIO
 from contextlib import redirect_stdout
-from functools import wraps
 from filatt.filatt import WinAtt, AttSet
+from excptr import excpcls, DIRPATH, DEFAULTDIR, DEFAULTFILE
+from pathlib import Path
+
 
 # Reference:
 # stackoverflow.com/.../constantly-print-subprocess-output-while-process-is-running
 
 
-def excp(b: bool = True) -> Any:
-    """Decorator for Exception"""
-
-    if not isinstance(b, bool):
-        raise ValueError(f'b = "{b}" Need to be boolean instead!')
-
-    def ckerr(f):
-        ckb = b
-
-        @wraps(f)
-        def trac(*args, **kwargs):
-            
-            try:
-                if fn := f(*args, **kwargs):
-                    return fn
-                del fn
-            except Exception:
-                match ckb:
-                    case True:
-                        raise
-                    case False:
-                        exc_type, exc_value, exc_traceback = sys.exc_info()
-                        print(f"ERROR - <{f.__name__}>:")
-                        traceback.print_exception(
-                            exc_type, exc_value, exc_traceback, limit=0
-                        )
-                        del exc_type, exc_value, exc_traceback
-
-        return trac
-
-    return ckerr
+DEFAULTDIR = os.path.join(DIRPATH, "EZPUB_TRACE")
+if not os.path.exists(DEFAULTDIR):
+    os.mkdir(DEFAULTDIR)
+DEFAULTFILE = os.path.join(DEFAULTDIR, Path(DEFAULTFILE).name)
 
 
+@excpcls(m=2, filenm=DEFAULTFILE)
 class Ezpub:
     """Building and Publishing project to PyPI"""
 
@@ -69,7 +43,6 @@ class Ezpub:
             raise EnvironmentError(f"{pth} is not exist!")
         return pth
 
-    @excp(False)
     def prre(self, pth: str, lock: bool = True) -> None:
         """MacOS X file protection"""
 
@@ -95,7 +68,6 @@ class Ezpub:
                 v.flush()
         del pth, v, pr, fl
 
-    @excp(False)
     def winatt(self, pth: str, lock: bool = True) -> None:
         """Windows file protection."""
 
