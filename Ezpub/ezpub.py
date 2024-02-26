@@ -186,7 +186,7 @@ class Ezpub:
             ):
                 case True:
                     pnam = (
-                        f"py -m build"
+                        f"python3 -m build"
                         if platform.startswith("win")
                         else "python3 -m build".split()
                     )
@@ -214,7 +214,7 @@ class Ezpub:
         match (altr := os.path.exists(ckplt[0]), ckplt[1]):
             case (True, True):
                 os.chdir(ckplt[0].parent)
-                pnam = f'py -m twine upload "{pth}"'
+                pnam = f'python3 -m twine upload "{pth}"'
                 self.popenp(pnam)
             case (True, False):
                 os.chdir(ckplt[0].parent)
