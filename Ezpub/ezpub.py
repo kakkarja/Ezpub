@@ -1,23 +1,23 @@
 # -*- coding: utf-8 -*-
 # Copyright © karjakak (K A K)
 
+import argparse
 import os
 import shutil
 import sys
-import argparse
-from subprocess import Popen, PIPE
+from contextlib import redirect_stdout
 from datetime import datetime as dt
-from Clien import clien
-from sys import platform
+from io import StringIO
 from pathlib import Path
+from subprocess import PIPE, Popen
+from sys import platform
+
+from Clien import clien
+from filatt.filatt import AttSet, WinAtt
 from filepmon.pgf import FilePermission as fpm
 from filfla.ffl import FilFla as ff
-from io import StringIO
-from contextlib import redirect_stdout
-from filatt.filatt import WinAtt, AttSet
-from excptr import excpcls, DIRPATH, DEFAULTDIR, DEFAULTFILE
-from pathlib import Path
 
+from excptr import DEFAULTDIR, DEFAULTFILE, DIRPATH, excpcls
 
 # Reference:
 # stackoverflow.com/.../constantly-print-subprocess-output-while-process-is-running
@@ -74,19 +74,11 @@ class Ezpub:
         a = None
         if lock:
             a = AttSet(pth)
-            for i in [
-                WinAtt.HIDDEN.att,
-                WinAtt.SYSTEM.att,
-                WinAtt.READONLY.att
-            ]:
+            for i in [WinAtt.HIDDEN.att, WinAtt.SYSTEM.att, WinAtt.READONLY.att]:
                 a.set_file_attrib(i)
         else:
             a = AttSet(pth, True)
-            for i in [
-                WinAtt.HIDDEN.att,
-                WinAtt.SYSTEM.att,
-                WinAtt.READONLY.att
-            ]:
+            for i in [WinAtt.HIDDEN.att, WinAtt.SYSTEM.att, WinAtt.READONLY.att]:
                 a.set_file_attrib(i)
         del a
 
@@ -181,9 +173,7 @@ class Ezpub:
                     else:
                         os.system(f"open {path}")
                     sys.exit(1)
-            match all(
-                os.path.exists(pth.joinpath(i)) for i in ["setup.cfg", "pyproject.toml"]
-            ):
+            match os.path.exists(pth.joinpath("pyproject.toml")):
                 case True:
                     pnam = (
                         f"python3 -m build"
@@ -192,7 +182,7 @@ class Ezpub:
                     )
                     self.popenp(pnam)
                 case _:
-                    print("This package need 'setup.cfg' and 'pyproject.toml'")
+                    print("This package need 'pyproject.toml'")
 
     def popenp(self, pnam: str | list) -> None:
         """Utility for Sub-Process"""
@@ -219,7 +209,7 @@ class Ezpub:
             case (True, False):
                 os.chdir(ckplt[0].parent)
                 self.prre(ppth)
-                pnam = ["python3", "-m", "twine", "upload", f"{pth}"]
+                pnam = ["python3", "-m", "twine", "upload", f'"{pth}"']
                 self.popenp(pnam)
                 self.prre(ppth, False)
             case (False, _):
@@ -239,20 +229,24 @@ def main() -> None:
         "-b", "--build", type=str, help="Build project, ready for publish."
     )
     group.add_argument("-p", "--publish", type=str, help="Publish to pypi.")
-    group.add_argument("-v", "--version", action='version', version='%(prog)s 1.3')
+    group.add_argument("-v", "--version", action="version", version="%(prog)s 1.3")
     args = parser.parse_args()
 
     ez = Ezpub()
-    if args.token:
-        if args.token == "None":
-            ez.tokfile()
-        else:
-            ez.tokfile(args.token)
-    elif args.build:
-        ez.build(args.build)
-    elif args.publish:
-        ez.publish(args.publish)
-    del ez, args, group, parser
+    try:
+        if args.token:
+            if args.token == "None":
+                ez.tokfile()
+            else:
+                ez.tokfile(args.token)
+        elif args.build:
+            ez.build(args.build)
+        elif args.publish:
+            ez.publish(args.publish)
+    except Exception as e:
+        print(e)
+    finally:
+        del ez, args, group, parser
 
 
 if __name__ == "__main__":
