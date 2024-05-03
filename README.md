@@ -38,10 +38,10 @@ ezpub -t $VARTOKEN
 
 ```Terminal
 # Window
-ezpub -b "\package-path"
+ezpub -b .\package-path\
 
 # MacOS X
-ezpub -b /package_path
+ezpub -b ./package_path/
 ```
 
 **TAKE NOTE:**
@@ -53,10 +53,10 @@ ezpub -b /package_path
 
 ```Terminal
 # For Windows only
-ezpub -p \package-path\dist\*
+ezpub -p .\package-path\dist\*
 
 # For MacOS X
-ezpub -p "package_path/dist/*"
+ezpub -p ./package_path/dist/*
 ```
 
 **TAKE NOTE:**
