@@ -209,7 +209,7 @@ class Ezpub:
             case (True, False):
                 os.chdir(ckplt[0].parent)
                 self.prre(ppth)
-                pnam = ["python3", "-m", "twine", "upload", f'\"{pth}\"']
+                pnam = ["python3", "-m", "twine", "upload", f"{pth}"]
                 self.popenp(pnam)
                 self.prre(ppth, False)
             case (False, _):
